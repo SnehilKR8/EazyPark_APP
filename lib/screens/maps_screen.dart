@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'login_screen.dart';
+import 'payment_screen.dart'; // Import PaymentScreen
 
 class MapsScreen extends StatefulWidget {
   const MapsScreen({super.key});
@@ -89,9 +90,9 @@ class _MapsScreenState extends State<MapsScreen> {
     setState(() {
       _markers.removeWhere((m) => m.markerId.value == "currentLocation");
       _markers.add(Marker(
-        markerId: MarkerId("currentLocation"),
+        markerId: const MarkerId("currentLocation"),
         position: _currentLocation!,
-        infoWindow: InfoWindow(title: "You are here"),
+        infoWindow: const InfoWindow(title: "You are here"),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       ));
     });
@@ -99,25 +100,50 @@ class _MapsScreenState extends State<MapsScreen> {
 
   Future<void> _fetchParkingSpots() async {
     try {
+      List<Map<String, dynamic>> parkingSpots = [];
+
+      // Try fetching from Firestore
       QuerySnapshot snapshot =
           await FirebaseFirestore.instance.collection('parkingspots').get();
-      final Set<Marker> markers = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+      parkingSpots = snapshot.docs
+          .map((doc) => {
+                'id': doc.id,
+                ...doc.data() as Map<String, dynamic>,
+              })
+          .toList();
+
+      // If no spots are found in Firestore, use a hardcoded spot near UNB
+      if (parkingSpots.isEmpty) {
+        print("No spots in Firestore, using hardcoded spot");
+        parkingSpots = [
+          {
+            'id': 'test-unb-spot',
+            'name': 'Aitken Centre Parking',
+            'lat': 45.9456,
+            'lng': -66.6413,
+            'available_spaces': 25, // Hardcoded 25 available spaces near UNB
+          }
+        ];
+      }
+
+      final Set<Marker> markers = parkingSpots.map((data) {
         return Marker(
-          markerId: MarkerId(doc.id),
+          markerId: MarkerId(data['id']),
           position: LatLng(data["lat"], data["lng"]),
           infoWindow: InfoWindow(
             title: data["name"],
             snippet: "Available: ${data["available_spaces"]} spots",
             onTap: () => _navigateToLocation(LatLng(data["lat"], data["lng"])),
           ),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
         );
       }).toSet();
 
       if (mounted) {
-        setState(() => _markers.addAll(markers));
+        setState(() {
+          _markers.addAll(markers);
+          print("Markers added: ${_markers.length}");
+        });
       }
     } catch (e) {
       print("❌ Failed to fetch parking spots: $e");
@@ -130,8 +156,8 @@ class _MapsScreenState extends State<MapsScreen> {
     final url =
         "https://www.google.com/maps/dir/?api=1&origin=${_currentLocation!.latitude},${_currentLocation!.longitude}&destination=${destination.latitude},${destination.longitude}&travelmode=driving";
 
-    if (await canLaunch(url)) {
-      await launch(url);
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
     } else {
       print("❌ Could not launch URL");
     }
@@ -157,27 +183,50 @@ class _MapsScreenState extends State<MapsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("EasyPark Map"),
+        title: const Text("EasyPark Map"),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.payment),
+            onPressed: () {
+              print("Payment button tapped");
+              try {
+                if (mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PaymentScreen(),
+                    ),
+                  );
+                } else {
+                  print("Widget not mounted, cannot navigate.");
+                }
+              } catch (e) {
+                print("Navigation error: $e");
+              }
+            },
+            tooltip: "Pay for Parking",
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (_) => LoginScreen()));
+                  context, MaterialPageRoute(builder: (_) => const LoginScreen()));
             },
-          )
+          ),
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : _locationError
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(_errorMessage ?? "Error",
-                          style: TextStyle(color: Colors.red)),
+                      Text(
+                        _errorMessage ?? "Error",
+                        style: const TextStyle(color: Colors.red),
+                      ),
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
@@ -186,7 +235,7 @@ class _MapsScreenState extends State<MapsScreen> {
                           });
                           _initialize();
                         },
-                        child: Text("Retry"),
+                        child: const Text("Retry"),
                       )
                     ],
                   ),
@@ -206,7 +255,7 @@ class _MapsScreenState extends State<MapsScreen> {
       floatingActionButton: _currentLocation != null
           ? FloatingActionButton(
               onPressed: _animateToUser,
-              child: Icon(Icons.my_location),
+              child: const Icon(Icons.my_location),
             )
           : null,
     );
