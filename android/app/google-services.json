@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "306837880069",
+    "project_id": "eazypark-4fbc6",
+    "storage_bucket": "eazypark-4fbc6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:306837880069:android:1a863619c571b4ce7ccb6c",
+        "android_client_info": {
+          "package_name": "com.example.easypark_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBycf5xZ2Ax8MEu-qNdpz0KDdxrJz_xV4o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
