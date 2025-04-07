@@ -42,6 +42,8 @@ flutter:
   assets:
     - assets/icons/custom_marker.png
     - assets/images/easypark_logo_transparent.png
+    - assets/icons/gold_marker.png
+
 
 flutter_icons:
   android: true

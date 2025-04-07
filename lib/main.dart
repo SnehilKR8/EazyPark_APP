@@ -6,36 +6,6 @@ import 'screens/maps_screen.dart';
 import 'screens/owner_login_screen.dart';
 import 'screens/splash_screen.dart';
 
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   print("🔥 Flutter binding initialized");
-
-//   try {
-//     if (Firebase.apps.isEmpty) {
-//       print("⏳ Initializing Firebase...");
-//       await Firebase.initializeApp(
-//         options: FirebaseOptions(
-//           apiKey: "AIzaSyAQc0751QjtX8Hmd6Om5dsraSutf9q_kQw",
-//           authDomain: "eazypark-4fbc6.firebaseapp.com",
-//           projectId: "eazypark-4fbc6",
-//           storageBucket: "eazypark-4fbc6.appspot.com",
-//           messagingSenderId: "306837880069",
-//           appId: "1:306837880069:web:a2776bd3441c85937ccb6c",
-//           measurementId: "G-YMX5ZH5FEC",
-//         ),
-//       ).timeout(const Duration(seconds: 10));
-//       print("✅ Firebase initialized");
-//     } else {
-//       print("⚠️ Firebase already initialized");
-//     }
-//   } catch (e, stackTrace) {
-//     print("❌ Firebase init failed: $e");
-//     print("🔍 Stacktrace: $stackTrace");
-//   }
-
-//   runApp(const MyApp());
-// }
-
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
